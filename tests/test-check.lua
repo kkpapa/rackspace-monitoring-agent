@@ -474,6 +474,7 @@ require('../tap')(function(test)
   end)
 
   test('test custom plugin partial output sleep', function(expect)
+    if los.type() == 'win32' then p('skipped') ; return end
     plugin_test('partial_output_with_sleep.sh', 'Everything is OK', 'available', {
       cb = expect(function(metrics)
         metrics = metrics['none']
