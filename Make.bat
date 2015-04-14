@@ -32,7 +32,9 @@ IF EXIST tests\tmpdir RMDIR /S /Q tests\tmpdir
 CALL mkdir tests\tmpdir
 set LUVI_MAIN=tests\run.lua 
 set LUVI_APP=.
+set errorlevel=
 lit
+exit /b %errorlevel%
 set LUVI_MAIN=
 set LUVI_APP=
 GOTO :end
