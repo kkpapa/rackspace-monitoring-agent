@@ -28,6 +28,8 @@ GOTO :end
 :test
 CALL Make.bat rackspace-monitoring-agent
 CALL lit.exe install
+IF EXIST tests\tmpdir RMDIR /S /Q tests\tmpdir
+CALL mkdir tests\tmpdir
 set LUVI_MAIN=tests\run.lua 
 set LUVI_APP=.
 lit
