@@ -7,6 +7,7 @@ $(TARGET): lit $(APP_FILES)
 	./lit make
 
 test: lit
+	rm -rf tests/tmpdir && mkdir tests/tmpdir
 	./lit install
 	LUVI_MAIN=tests/run.lua LUVI_APP=. ./lit
 

@@ -182,6 +182,7 @@ function BaseCheck:_runCheck()
     cr:setStatus('Timeout in Run Check')
     emitCompleted(cr)
   end)
+  timeoutTimer:unref()
 
   local status, err = pcall(function()
     self:run(function(checkResult)
@@ -421,7 +422,7 @@ function ChildCheck:_runChild(exePath, exeArgs, environ, callback)
     local timeoutSeconds = (self._timeout / 1000)
 
     self._log(logging.DEBUG, fmt("%s: Plugin didn't finish in %s seconds, killing it...", exePath, timeoutSeconds))
-    child:kill(9)
+    child:kill('sigkill')
     killed = true
 
     checkResult:setError(fmt("Plugin didn't finish in %s seconds", timeoutSeconds))
@@ -444,6 +445,7 @@ function ChildCheck:_runChild(exePath, exeArgs, environ, callback)
   local function waitForIO(callback)
     callback = fireOnce(callback)
     child.stdout:on('end', callback)
+    child.stdout:on('error', callback)
   end
 
   local code = 0
@@ -467,31 +469,15 @@ function ChildCheck:_runChild(exePath, exeArgs, environ, callback)
     process.nextTick(function()
       -- Callback is called on the next tick so any pending line processing can
       -- happen before calling a callback.
-      local checkStatus
-
-      self._log(logging.DEBUG, fmt("%s: done (code=%s)", exePath, code))
-
+      self._log(logging.INFO, fmt("%s: done (code=%s)", exePath, code))
       if code ~= 0 then
         -- If a status is provided use it instead of using the default one
-        checkStatus = checkResult:getStatus()
-
-        for _, v in ipairs(self._lines.stdout) do
-          v = trim(v)
-          self._log(logging.DEBUG, fmt("stdout: %s", v))
-        end
-
-        for _, v in ipairs(self._lines.stderr) do
-          v = trim(v)
-          self._log(logging.DEBUG, fmt("stderr: %s", v))
-        end
-
+        local checkStatus = checkResult:getStatus()
         if not checkStatus or checkStatus == DEFAULT_STATUS then
           checkStatus = fmt('Plugin exited with non-zero status code (code=%s)', (code))
         end
-
         checkResult:setError(checkStatus)
       end
-
 
       self._lastResult = checkResult
       callback(checkResult)
