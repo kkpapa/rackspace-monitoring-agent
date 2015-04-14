@@ -337,7 +337,6 @@ require('../tap')(function(test)
   end)
 
   test('test custom plugin file does not exist', function(expect)
-    if los.type() == 'win32' then p('skipped') ; return end
     local check = PluginCheck:new({id='foo', period=30, details={file='magical_ranibow_pony.sh'}})
     assert(not check._lastResult)
     check:run(expect(function(result)
@@ -538,13 +537,14 @@ require('../tap')(function(test)
     }, expect)
   end)
 
-  test('test custom plugin powershell', function(expect)
-    if los.type() ~= 'win32' then p('skipped') ; return end
-    plugin_test('windows2.ps1', 'Test plugin is OK', 'available', {
-      cb = expect(function(metrics)
-        assert(metrics['none']['metric1'].t == 'int64')
-        assert(metrics['none']['metric2'].v == '100')
-      end)
-    }, expect)
-  end)
+  --is powershell supported as a plugin?
+  --test('test custom plugin powershell', function(expect)
+  --  if los.type() ~= 'win32' then p('skipped') ; return end
+  --  plugin_test('windows2.ps1', 'Test plugin is OK', 'available', {
+  --    cb = expect(function(metrics)
+  --      assert(metrics['none']['metric1'].t == 'int64')
+  --      assert(metrics['none']['metric2'].v == '100')
+  --    end)
+  --  }, expect)
+  --end)
 end)
